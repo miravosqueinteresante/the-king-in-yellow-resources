@@ -1,0 +1,21 @@
+title: "The King in Yellow Resource Hub"
+description: "Explore the world of The King in Yellow by Robert W. Chambers — analysis, Carcosa glossary, Yellow Sign symbolism, full text, adaptations in True Detective and TTRPGs, and daily weird fiction content."
+baseurl: "/the-king-in-yellow-resources"
+url: "https://miravosqueinteresante.github.io"
+github_username: miravosqueinteresante
+lang: en
+author:
+  name: The King in Yellow Resource Hub
+  url: https://miravosqueinteresante.github.io/the-king-in-yellow-resources
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: /the-king-in-yellow-resources/assets/images/social-card.png
+tagline: "Mystery, Madness, and the Yellow Sign"
+paginate: 10
+paginate_path: "/page/:num/"

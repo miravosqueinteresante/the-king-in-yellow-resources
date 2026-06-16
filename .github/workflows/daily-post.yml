@@ -1,0 +1,41 @@
+name: Daily Post Generator
+
+on:
+  schedule:
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_MODELS_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet --upgrade pip
+
+      - name: Generate daily post
+        id: daily
+        env:
+          GH_MODELS_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
+        run: python scripts/daily-post.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "King in Yellow Bot"
+          git config user.email "bot@the-king-in-yellow-resources"
+          git add -A
+          git diff --cached --quiet || git commit -m "Daily post — $(date +'%Y-%m-%d')"
+          git push
