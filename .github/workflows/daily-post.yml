@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   generate-post:
@@ -35,5 +36,15 @@ jobs:
           git config user.name "King in Yellow Bot"
           git config user.email "bot@the-king-in-yellow-resources"
           git add -A
-          git diff --cached --quiet || git commit -m "Daily post — $(date +'%Y-%m-%d')"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Daily post — $(date +'%Y-%m-%d')"
+            git push
+          fi
+
+      - name: Trigger deploy
+        run: |
+          gh workflow run "Build and deploy Jekyll to GitHub Pages"
+        env:
+          GH_TOKEN: ${{ secrets.GH_MODELS_TOKEN }}
