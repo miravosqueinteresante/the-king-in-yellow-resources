@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""
-Daily Post Generator for The King in Yellow Resource Hub.
-Generates a Jekyll post using GitHub Models (GPT-4o-mini) with 15 content types,
-each with 10-30 specific subtopics for ~200+ unique posts before any repeat.
-"""
-
 import os
+import re
 import sys
 import json
 import logging
@@ -25,6 +20,7 @@ GH_MODELS_ENDPOINT = "https://models.inference.ai.azure.com/chat/completions"
 GH_MODEL = "gpt-4o-mini"
 
 AMAZON_LINK = "https://www.amazon.com/dp/B0CTXCQ9HM"
+SITE_BASE = "/the-king-in-yellow-resources"
 
 SUPTOPICS = {
     "character_analysis": [
@@ -244,6 +240,75 @@ CONTENT_TITLES["yellow_sign_meaning"] = "The Yellow Sign"
 CONTENT_TITLES["carcosa_lore"] = "Carcosa Lore"
 CONTENT_TITLES["character_analysis"] = "Character Analysis"
 
+INTERNAL_LINKS = {
+    "character_analysis": [
+        ("analysis/carcosa-glossary/", "Carcosa Glossary \u2014 Characters & Places"),
+    ],
+    "carcosa_lore": [
+        ("analysis/carcosa-glossary/", "Carcosa Glossary \u2014 Complete Guide"),
+    ],
+    "yellow_sign_meaning": [
+        ("analysis/yellow-sign-symbolism/", "The Yellow Sign \u2014 Symbolism and Meaning"),
+        ("analysis/carcosa-glossary/", "Carcosa Glossary \u2014 Places, Characters & Concepts"),
+    ],
+    "story_analysis": [
+        ("analysis/story-guide/", "Story-by-Story Guide to The King in Yellow"),
+        ("full-text/the-repairer-of-reputations/", "Full Text: The Repairer of Reputations"),
+        ("full-text/the-yellow-sign/", "Full Text: The Yellow Sign"),
+        ("full-text/the-mask/", "Full Text: The Mask"),
+        ("full-text/the-court-of-the-dragon/", "Full Text: The Court of the Dragon"),
+    ],
+    "quote_exploration": [
+        ("analysis/carcosa-glossary/", "Carcosa Glossary \u2014 Places, Characters & Concepts"),
+    ],
+    "adaptation_spotlight": [
+        ("adaptations/true-detective/", "True Detective Season 1 \u2014 Analysis"),
+        ("adaptations/roleplaying-games/", "The King in Yellow in TTRPGs"),
+    ],
+    "chambers_life": [
+        ("analysis/chambers-biography/", "Robert W. Chambers \u2014 Full Biography"),
+    ],
+    "weird_fiction_history": [
+        ("analysis/chambers-biography/", "Robert W. Chambers \u2014 Biography"),
+    ],
+    "thematic_analysis": [
+        ("analysis/story-guide/", "Story-by-Story Guide"),
+        ("analysis/carcosa-glossary/", "Carcosa Glossary"),
+    ],
+    "reading_guide": [
+        ("analysis/story-guide/", "Story-by-Story Guide"),
+        ("full-text/", "Complete Full Text Index"),
+    ],
+    "symbolism_deep_dive": [
+        ("analysis/yellow-sign-symbolism/", "The Yellow Sign \u2014 Symbolism and Meaning"),
+    ],
+    "comparison_essay": [
+        ("analysis/chambers-biography/", "Robert W. Chambers \u2014 Biography"),
+    ],
+    "behind_the_story": [
+        ("analysis/story-guide/", "Story-by-Story Guide"),
+        ("full-text/", "Complete Full Text Index"),
+    ],
+    "mythos_exploration": [
+        ("analysis/carcosa-glossary/", "Carcosa Glossary"),
+        ("analysis/yellow-sign-symbolism/", "The Yellow Sign \u2014 Symbolism"),
+    ],
+    "language_and_vocabulary": [
+        ("full-text/", "Complete Full Text Index"),
+    ],
+}
+
+
+def slugify(text):
+    text = text.lower()
+    text = re.sub(r'\([^)]*\)', '', text)
+    text = re.sub(r'[\u2014\u2013]', '', text)
+    text = re.sub(r'[^a-z0-9\s-]', '', text)
+    text = re.sub(r'\s+', '-', text.strip())
+    text = re.sub(r'-+', '-', text)
+    text = text.strip('-')
+    return text[:100]
+
 
 def load_queue():
     if os.path.exists(QUEUE_FILE):
@@ -261,7 +326,6 @@ def save_queue(queue):
 def pick_content_type_and_topic(queue):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    # Find content types with unused subtopics
     candidates = []
     for ctype, topics in SUPTOPICS.items():
         used = set(queue.get(ctype, {}).get("used", []))
@@ -270,7 +334,6 @@ def pick_content_type_and_topic(queue):
             candidates.append(ctype)
 
     if not candidates:
-        # All subtopics used — reset all
         queue = {k: {"used": []} for k in SUPTOPICS}
         save_queue(queue)
         candidates = list(SUPTOPICS.keys())
@@ -292,6 +355,23 @@ def pick_content_type_and_topic(queue):
     return ctype, topic
 
 
+def build_explore_more(content_type):
+    links = INTERNAL_LINKS.get(content_type, [])
+    if not links:
+        links = [
+            ("analysis/carcosa-glossary/", "Carcosa Glossary"),
+            ("analysis/story-guide/", "Story-by-Story Guide"),
+        ]
+
+    section = "\n\n---\n\n### Explore More\n\n"
+    for path, label in links:
+        section += f"- [{label}]({SITE_BASE}/{path})\n"
+
+    section += f"\n*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [{AMAZON_LINK.replace('https://www.amazon.com/dp/', '')}]({AMAZON_LINK})*"
+    # ^ simpler: just the ASIN as text
+    return section
+
+
 def build_prompt(content_type, topic):
     today = datetime.now(timezone.utc).strftime("%B %d, %Y")
 
@@ -308,11 +388,6 @@ REQUIREMENTS:
 - Use literary analysis, not plot summary only
 - Include specific references to the text where possible
 - No markdown code blocks in the body (plain markdown only)
-- End with the following EXACT footer:
-
----
-
-*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [The King in Yellow: Nightmares Diary and Coloring Book]({AMAZON_LINK})*
 
 IMPORTANT FORMAT:
 Return ONLY the post body. Do NOT include a title — the title will be added separately.
@@ -359,25 +434,65 @@ def generate_title(content, topic):
     return f"{short} — {t.strftime('%B %d, %Y')}"
 
 
+def find_related_posts(content_type, current_slug):
+    if not os.path.exists(POSTS_DIR):
+        return []
+
+    related = []
+    for fname in os.listdir(POSTS_DIR):
+        if not fname.endswith(".md"):
+            continue
+        if current_slug and current_slug in fname:
+            continue
+
+        fpath = os.path.join(POSTS_DIR, fname)
+        with open(fpath, "r", encoding="utf-8") as f:
+            text = f.read()
+
+        lines = text.split("\n")
+        other_type = None
+        rtitle = ""
+        rdate = ""
+        for line in lines:
+            if line.startswith("content_type:"):
+                other_type = line.split(":", 1)[1].strip().strip('"').strip("'")
+            elif line.startswith("title:"):
+                rtitle = line.split(":", 1)[1].strip().strip('"').strip("'")
+
+        if other_type == content_type:
+            slug = fname.replace(".md", "")
+            related.append((slug, rtitle))
+
+    return related
+
+
 def save_post(content, content_type, topic):
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%Y-%m-%d")
     title = generate_title(content, topic)
-    slug_safe = content_type
-    slug = f"{date_str}-{slug_safe}"
+    slug = slugify(topic)
+
+    explore = build_explore_more(content_type)
+
+    related = find_related_posts(content_type, slug)
+    if related:
+        explore += "\n\n### Previous Posts on This Topic\n\n"
+        for slug_url, rtitle in related:
+            explore += f"- [{rtitle}]({SITE_BASE}/{date_str[:4]}/{date_str[5:7]}/{slug_url}.html)\n"
 
     frontmatter = f"""---
 layout: post
 title: "{title}"
 date: {date_str} 12:00:00 +0000
 categories: blog
+content_type: {content_type}
 tags: [{content_type.replace('_', ' ')} the-king-in-yellow chambers analysis]
 ---
 """
-    full_content = frontmatter + content.strip()
+    full_content = frontmatter + content.strip() + explore
 
     os.makedirs(POSTS_DIR, exist_ok=True)
-    filepath = os.path.join(POSTS_DIR, f"{slug}.md")
+    filepath = os.path.join(POSTS_DIR, f"{date_str}-{slug}.md")
 
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(full_content)

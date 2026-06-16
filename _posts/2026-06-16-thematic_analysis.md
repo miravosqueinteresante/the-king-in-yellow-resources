@@ -3,6 +3,7 @@ layout: post
 title: "Thematic Analysis — June 16, 2026"
 date: 2026-06-16 12:00:00 +0000
 categories: blog
+content_type: thematic_analysis
 tags: [thematic analysis the-king-in-yellow chambers analysis]
 ---
 In Robert W. Chambers' collection "The King in Yellow," the theme of madness intertwines with various elements of human experience, including art, forbidden knowledge, and identity. Chambers crafts a narrative that suggests madness is not merely a personal downfall but rather a consequence of confronting truths that humanity may not be prepared to face. 

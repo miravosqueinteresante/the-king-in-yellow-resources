@@ -8,3 +8,21 @@ layout: default
   {% if page.tags %} • {{ page.tags | join: ", " }}{% endif %}</p>
   {{ content }}
 </article>
+
+{% if page.content_type %}
+{% assign related = site.posts | where: "content_type", page.content_type | where_exp: "p", "p.url != page.url" | sort: "date" | reverse %}
+{% if related.size > 0 %}
+<hr>
+<section class="related-posts">
+<h2>Related Posts</h2>
+<ul>
+{% for p in related limit:5 %}
+  <li>
+    <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
+    <small><time datetime="{{ p.date | date_to_xmlschema }}">{{ p.date | date_to_string }}</time></small>
+  </li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
+{% endif %}

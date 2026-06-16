@@ -3,6 +3,7 @@ layout: post
 title: "Comparative Reading — June 16, 2026"
 date: 2026-06-16 12:00:00 +0000
 categories: blog
+content_type: comparison_essay
 tags: [comparison essay the-king-in-yellow chambers analysis]
 ---
 Robert W. Chambers' The King in Yellow has long captivated readers with its blend of decadence, existential dread, and the supernatural. Its influence can be seen throughout the realm of weird fiction, particularly in H.P. Lovecraft’s works. While Chambers establishes a haunting atmosphere steeped in the unknown, Lovecraft amplifies this sense of dread with an expansive cosmic horror. A comparative reading reveals how both authors explore themes of madness and the fragility of reality, albeit through different lenses.

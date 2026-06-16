@@ -3,6 +3,7 @@ layout: post
 title: "The mythos as collaborative storytelling — June 16, 2026"
 date: 2026-06-16 12:00:00 +0000
 categories: blog
+content_type: mythos_exploration
 tags: [mythos exploration the-king-in-yellow chambers analysis]
 ---
 The mythos created by Robert W. Chambers in "The King in Yellow" serves as a profound example of collaborative storytelling, intertwining the experiences and interpretations of both the author and his readers. Chambers' collection of tales presents a mysterious and unsettling narrative universe that invites readers to project their own fears and imaginations onto the text. 

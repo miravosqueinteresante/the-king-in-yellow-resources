@@ -3,6 +3,7 @@ layout: post
 title: "Weird Fiction History — June 16, 2026"
 date: 2026-06-16 12:00:00 +0000
 categories: blog
+content_type: weird_fiction_history
 tags: [weird fiction history the-king-in-yellow chambers analysis]
 ---
 Robert W. Chambers’ 1895 collection, The King in Yellow, occupies a unique and pivotal position in the landscape of weird fiction. As an early precursor to the genre, it not only draws on the eerie and unsettling themes established by its predecessors but also lays the groundwork for future explorations of the uncanny. Chambers' work resonates with the surreal, the inexplicable, and the horrors lurking just beneath the surface of reality, encapsulating the essence of weird fiction.
