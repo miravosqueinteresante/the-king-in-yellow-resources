@@ -8,10 +8,10 @@ Welcome to the most comprehensive resource hub for **The King in Yellow**, the 1
 
 ## What You'll Find Here
 
-- **[Full Text](/full-text/)** — The complete text of The King in Yellow (public domain)
-- **[Analysis & Glossary](/analysis/)** — Deep dives into Carcosa, the Yellow Sign, characters, and themes
-- **[Adaptations](/adaptations/)** — The King in Yellow in True Detective, TTRPGs (Call of Cthulhu), and pop culture
-- **[Daily Blog](/blog/)** — New content every day: analysis, quotes, lore, and weird fiction
+- **[Full Text]({{ '/full-text/' | relative_url }})** — The complete text of The King in Yellow (public domain)
+- **[Analysis & Glossary]({{ '/analysis/' | relative_url }})** — Deep dives into Carcosa, the Yellow Sign, characters, and themes
+- **[Adaptations]({{ '/adaptations/' | relative_url }})** — The King in Yellow in True Detective, TTRPGs (Call of Cthulhu), and pop culture
+- **[Daily Blog]({{ '/blog/' | relative_url }})** — New content every day: analysis, quotes, lore, and weird fiction
 
 ## The King in Yellow: Quick Overview
 
