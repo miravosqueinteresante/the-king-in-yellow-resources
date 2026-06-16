@@ -4,8 +4,10 @@
     "last_date": null
   },
   "carcosa_lore": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "Yhtill \u2014 the sister city"
+    ],
+    "last_date": "2026-06-16"
   },
   "yellow_sign_meaning": {
     "used": [],
