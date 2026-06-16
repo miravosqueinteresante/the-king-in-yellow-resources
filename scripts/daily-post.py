@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Daily Post Generator for The King in Yellow Resource Hub.
-Generates a Jekyll post using GitHub Models (GPT-4o-mini) with rotating content types.
-Run via GitHub Actions on a daily cron schedule.
+Generates a Jekyll post using GitHub Models (GPT-4o-mini) with 15 content types,
+each with 10-30 specific subtopics for ~200+ unique posts before any repeat.
 """
 
 import os
@@ -12,7 +12,6 @@ import logging
 import random
 from datetime import datetime, timezone
 from urllib.request import Request, urlopen
-from urllib.error import URLError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("daily-post")
@@ -27,104 +26,223 @@ GH_MODEL = "gpt-4o-mini"
 
 AMAZON_LINK = "https://www.amazon.com/dp/B0CTXCQ9HM"
 
-CONTENT_TYPES = [
-    "character_analysis",
-    "carcosa_lore",
-    "yellow_sign_meaning",
-    "story_analysis",
-    "quote_exploration",
-    "adaptation_spotlight",
-    "chambers_life",
-    "weird_fiction_history",
-    "thematic_analysis",
-    "reading_guide",
-    "symbolism_deep_dive",
-    "comparison_essay",
-    "behind_the_story",
-    "mythos_exploration",
-    "language_and_vocabulary",
-]
-
-CONTENT_TITLES = {
-    "character_analysis": "Character Analysis",
-    "carcosa_lore": "Carcosa Lore",
-    "yellow_sign_meaning": "The Yellow Sign: Symbolism & Meaning",
-    "story_analysis": "Story Analysis",
-    "quote_exploration": "Quote of the Day",
-    "adaptation_spotlight": "Adaptation Spotlight",
-    "chambers_life": "Chambers' Life & Times",
-    "weird_fiction_history": "Weird Fiction History",
-    "thematic_analysis": "Thematic Analysis",
-    "reading_guide": "Reading Guide",
-    "symbolism_deep_dive": "Symbolism Deep Dive",
-    "comparison_essay": "Comparative Reading",
-    "behind_the_story": "Behind the Story",
-    "mythos_exploration": "Mythos Exploration",
-    "language_and_vocabulary": "Language & Vocabulary",
+SUPTOPICS = {
+    "character_analysis": [
+        "Hildred Castaigne — The Repairer of Reputations",
+        "Tessie Reardon — The Yellow Sign",
+        "Jack Scott — The Yellow Sign",
+        "Boris Yvain — The Mask",
+        "Geneviève — The Mask",
+        "Mr. Wilde — The Repairer of Reputations",
+        "The Watchman — The Yellow Sign",
+        "Cassilda — the play within the book",
+        "Camilla — the play within the book",
+        "The Stranger — the play within the book",
+        "The Phantom of Truth — the play within the book",
+        "Hastur — from name to mythos",
+        "The King in Yellow — the entity",
+        "Constance — The Demoiselle d'Ys",
+        "Philip — The Demoiselle d'Ys",
+        "Seigneur Raoul — The Demoiselle d'Ys",
+        "Hastings — The Street of Our Lady of the Fields",
+        "Selby — Rue Barrée",
+        "Jack Trent — The Street of the First Shell",
+        "The Clown — The Prophets' Paradise / The Green Room",
+        "Sylvia Elven — The Street of the First Shell",
+    ],
+    "carcosa_lore": [
+        "Carcosa — the lost city described in the play",
+        "The Lake of Hali — the boundary between worlds",
+        "The twin suns of Carcosa",
+        "Black stars in the sky of Carcosa",
+        "The Hyades star cluster connection",
+        "Aldebaran and its role in the mythos",
+        "Yhtill — the sister city",
+        "The geography of the play's world",
+        "Carcosa as a state of mind",
+        "How later writers expanded Carcosa",
+        "Carcosa in popular imagination",
+    ],
+    "yellow_sign_meaning": [
+        "What is the Yellow Sign? Physical description",
+        "The Yellow Sign as a symbol of forbidden knowledge",
+        "The Yellow Sign in The Repairer of Reputations",
+        "The Yellow Sign in The Yellow Sign story",
+        "The Hyades and the shape of the Yellow Sign",
+        "The Yellow Sign as a memetic hazard",
+        "The Yellow Sign in occult traditions",
+        "How the Yellow Sign differs from Lovecraft's symbols",
+        "The Yellow Sign in True Detective's spiral",
+        "The Yellow Sign in Call of Cthulhu RPG",
+    ],
+    "story_analysis": [
+        "The Repairer of Reputations — plot and themes",
+        "The Repairer of Reputations — symbolism",
+        "The Repairer of Reputations — character study",
+        "The Mask — plot and themes",
+        "The Mask — science and the supernatural",
+        "The Court of the Dragon — plot and themes",
+        "The Court of the Dragon — psychological horror",
+        "The Yellow Sign — a close reading",
+        "The Yellow Sign — tragedy and fate",
+        "The Demoiselle d'Ys — time and romance",
+        "The Demoiselle d'Ys — Breton folklore",
+        "The Prophets' Paradise — experimental structure",
+        "The Street of the Four Winds — art and poverty",
+        "The Street of the First Shell — war and love",
+        "The Street of Our Lady of the Fields — Parisian bohemia",
+        "Rue Barrée — social barriers",
+        "The play within the book — meta-narrative structure",
+    ],
+    "quote_exploration": [
+        "Strange is the night where black stars rise",
+        "The King in Yellow — Act 1, Scene 2 excerpt",
+        "Have you found the Yellow Sign?",
+        "I am the King in Yellow — the phantom's claim",
+        "The Pallid Mask — the Phantom of Truth",
+        "Cassilda's Song in full",
+        "Along the shore the cloud waves break",
+        "Ne raillons pas les fous — epigraph to The Repairer",
+        "Let the red dawn surmise — epigraph to The Yellow Sign",
+        "The song of the Hyades",
+        "The music of Carcosa descriptions",
+        "The madhouse scenes dialogue",
+        "The final lines of The Yellow Sign",
+        "The opening of The Court of the Dragon",
+        "The closing of The Repairer of Reputations",
+    ],
+    "adaptation_spotlight": [
+        "True Detective Season 1 — the Yellow King",
+        "True Detective — Carcosa in Louisiana",
+        "True Detective — the spiral vs the Yellow Sign",
+        "Call of Cthulhu — The King in Yellow campaign",
+        "Call of Cthulhu — The Yellow Sign as artifact",
+        "Delta Green — the King in Yellow",
+        "The Yellow King RPG by Robin D. Laws",
+        "Bloodborne — echoes of the King in Yellow",
+        "The King in Yellow in comic books",
+        "The King in Yellow in music and albums",
+        "Stage adaptations of the play",
+        "The King in Yellow in video games",
+    ],
+    "chambers_life": [
+        "Robert W. Chambers — early life and art studies",
+        "Chambers in Paris — the Académie Julian years",
+        "From illustrator to writer — Chambers' career shift",
+        "The success of The King in Yellow in 1895",
+        "Why Chambers abandoned weird fiction",
+        "Chambers as a bestselling romance novelist",
+        "Chambers and H.P. Lovecraft — the connection",
+        "Chambers' legacy and rediscovery",
+        "Chambers' other supernatural works",
+        "Chambers' place in American literature",
+    ],
+    "weird_fiction_history": [
+        "The King in Yellow as proto-weird fiction",
+        "Precursors — Poe and the psychological tale",
+        "Precursors — Ambrose Bierce and the supernatural",
+        "Contemporary — M.R. James and the ghost story",
+        "The King in Yellow and the decadent movement",
+        "How The King in Yellow influenced Lovecraft",
+        "The King in Yellow in the Cthulhu Mythos",
+        "The King in Yellow and the New Wave of horror",
+        "Modern weird fiction and Chambers' revival",
+        "The King in Yellow and the French symbolist tradition",
+    ],
+    "thematic_analysis": [
+        "Madness as a consequence of forbidden knowledge",
+        "The role of art in driving obsession",
+        "Identity and the dissolution of self",
+        "Reality versus illusion in Chambers' stories",
+        "Fate and free will in The King in Yellow",
+        "The bohemian artist as tragic figure",
+        "Love and death intertwined",
+        "Decadence and decay as themes",
+        "The unreliable narrator in Chambers",
+        "Memory and the past's grip on the present",
+        "Class and society in the Paris stories",
+    ],
+    "reading_guide": [
+        "How to approach The King in Yellow for the first time",
+        "Reading order — the four play-linked stories first",
+        "Understanding the connection between all ten stories",
+        "What to look for in The Repairer of Reputations",
+        "Enjoying the romance stories on their own terms",
+        "The Paris stories — context and appreciation",
+        "How the play functions as a narrative device",
+        "Key symbols to track through the collection",
+        "What makes Chambers different from Lovecraft",
+        "A companion guide for rereading",
+    ],
+    "symbolism_deep_dive": [
+        "Masks as symbols of hidden identity",
+        "Mirrors and reflections in Chambers",
+        "The play within the book as meta-symbol",
+        "Black stars and inverted cosmology",
+        "Twin suns and duality",
+        "The color yellow — meaning and mood",
+        "The love-death motif",
+        "Cats and animal symbolism",
+        "Religious imagery and the Catholic background",
+        "Artistic tools and paint as symbols",
+        "Doors and thresholds between worlds",
+        "The church as a setting for horror",
+    ],
+    "comparison_essay": [
+        "Chambers and Poe — psychological horror compared",
+        "Chambers and Lovecraft — cosmic horror compared",
+        "Chambers and M.R. James — dread compared",
+        "Chambers and Arthur Machen — the hidden world",
+        "Chambers and Oscar Wilde — decadence compared",
+        "Chambers and Algernon Blackwood — nature and horror",
+        "Chambers and Robert E. Howard — weird adventure",
+        "Chambers and Ramsey Campbell — urban horror",
+        "The King in Yellow and House of Leaves — ergodic horror",
+        "The King in Yellow and Annihilation — cosmic dread",
+    ],
+    "behind_the_story": [
+        "The Repairer of Reputations — future New York inspiration",
+        "The Mask — the science of the soul",
+        "The Court of the Dragon — a nightmare vision",
+        "The Yellow Sign — Chambers' masterpiece",
+        "The Demoiselle d'Ys — Brittany and folklore",
+        "The Prophets' Paradise — autobiographical roots",
+        "The Street of the Four Winds — the Latin Quarter",
+        "The Street of the First Shell — the Siege of Paris",
+        "The Street of Our Lady of the Fields — Chambers in love",
+        "Rue Barrée — American in Paris",
+        "The real Paris locations in Chambers' stories",
+    ],
+    "mythos_exploration": [
+        "How Lovecraft adopted Hastur from Chambers",
+        "August Derleth and the expansion of the mythos",
+        "The Yellow Sign in the Cthulhu Mythos",
+        "Hastur — from place name to Great Old One",
+        "The King in Yellow in the Expanded Mythos",
+        "Chaosium's interpretation of the mythos",
+        "Modern cosmic horror authors on Chambers",
+        "The King in Yellow in the SCP Foundation",
+        "Fan interpretations and online lore",
+        "The mythos as collaborative storytelling",
+    ],
+    "language_and_vocabulary": [
+        "Chambers' descriptive prose style",
+        "The use of French in the Paris stories",
+        "Chambers' vocabulary of decay and beauty",
+        "The poetic structure of Cassilda's Song",
+        "Archaic language in The Demoiselle d'Ys",
+        "Chambers' dialogue — natural or stylized?",
+        "The rhythm of Chambers' sentences",
+        "Military terminology in The Street of the First Shell",
+        "Art terminology in the studio stories",
+        "How Chambers creates atmosphere through language",
+    ],
 }
 
-CONTEXT_PROMPTS = {
-    "character_analysis": (
-        "Write a 300-500 word analysis of one specific character from The King in Yellow."
-        " Include who they are, their role in the story, and what they represent thematically."
-    ),
-    "carcosa_lore": (
-        "Write a 300-500 word exploration of Carcosa — the lost city from The King in Yellow."
-        " Describe its features, its significance, and how it has been interpreted in subsequent works."
-    ),
-    "yellow_sign_meaning": (
-        "Write a 300-500 word analysis of the Yellow Sign — its appearance in the stories,"
-        " its symbolic meaning, and its influence on later fiction and occult traditions."
-    ),
-    "story_analysis": (
-        "Write a 300-500 word analysis of one specific story from The King in Yellow collection."
-        " Cover plot, themes, characters, and its place in the collection."
-    ),
-    "quote_exploration": (
-        "Pick a notable quote from The King in Yellow and explore its meaning, context, and resonance."
-        " Write 300-500 words."
-    ),
-    "adaptation_spotlight": (
-        "Write a 300-500 word spotlight on an adaptation of The King in Yellow in media"
-        " — True Detective, Call of Cthulhu, The Yellow King RPG, video games, music, or other media."
-    ),
-    "chambers_life": (
-        "Write a 300-500 word piece about Robert W. Chambers' life — his art career,"
-        " his Paris years, his transition to writing, or his place in American literature."
-    ),
-    "weird_fiction_history": (
-        "Write a 300-500 word exploration of how The King in Yellow fits into the broader"
-        " weird fiction tradition — its predecessors, contemporaries, and legacy."
-    ),
-    "thematic_analysis": (
-        "Write a 300-500 word thematic analysis of one of the major themes in The King in Yellow"
-        " — madness, forbidden knowledge, art and obsession, identity, or reality vs illusion."
-    ),
-    "reading_guide": (
-        "Write a 300-500 word guide for readers approaching The King in Yellow for the first time."
-        " Offer context, reading tips, and what to pay attention to in each story."
-    ),
-    "symbolism_deep_dive": (
-        "Write a 300-500 word deep dive into a specific symbol or motif from The King in Yellow"
-        " — masks, mirrors, the play, black stars, twin suns, or similar."
-    ),
-    "comparison_essay": (
-        "Write a 300-500 word comparison between The King in Yellow and another work"
-        " — Lovecraft, Poe, Machen, Blackwood, or a modern work influenced by Chambers."
-    ),
-    "behind_the_story": (
-        "Write a 300-500 word piece about the background or inspirations behind a specific story"
-        " in The King in Yellow collection."
-    ),
-    "mythos_exploration": (
-        "Write a 300-500 word exploration of how the King in Yellow mythos has grown beyond Chambers"
-        " — Lovecraft's additions, Derleth's expansions, and modern interpretations."
-    ),
-    "language_and_vocabulary": (
-        "Write a 300-500 word exploration of unusual language, vocabulary, or stylistic elements"
-        " in The King in Yellow."
-    ),
-}
+CONTENT_TITLES = {k: k.replace("_", " ").title() for k in SUPTOPICS}
+CONTENT_TITLES["yellow_sign_meaning"] = "The Yellow Sign"
+CONTENT_TITLES["carcosa_lore"] = "Carcosa Lore"
+CONTENT_TITLES["character_analysis"] = "Character Analysis"
 
 
 def load_queue():
@@ -140,34 +258,56 @@ def save_queue(queue):
         json.dump(queue, f, indent=2)
 
 
-def pick_content_type(queue):
+def pick_content_type_and_topic(queue):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    used_order = sorted(queue.keys(), key=lambda k: queue[k])
-    available = [t for t in CONTENT_TYPES if t not in queue or t not in used_order[-3:]]
-    choice = random.choice(available)
-    queue[choice] = today
+
+    # Find content types with unused subtopics
+    candidates = []
+    for ctype, topics in SUPTOPICS.items():
+        used = set(queue.get(ctype, {}).get("used", []))
+        unused = [t for t in topics if t not in used]
+        if unused:
+            candidates.append(ctype)
+
+    if not candidates:
+        # All subtopics used — reset all
+        queue = {k: {"used": []} for k in SUPTOPICS}
+        save_queue(queue)
+        candidates = list(SUPTOPICS.keys())
+        log.info("All subtopics exhausted — resetting queue")
+
+    ctype = random.choice(candidates)
+    topics = SUPTOPICS[ctype]
+    used = set(queue.get(ctype, {}).get("used", []))
+    unused = [t for t in topics if t not in used]
+    topic = random.choice(unused)
+
+    if ctype not in queue:
+        queue[ctype] = {"used": [], "last_date": None}
+    queue[ctype]["used"].append(topic)
+    queue[ctype]["last_date"] = today
     save_queue(queue)
-    return choice
+
+    log.info("Picked: %s → %s", ctype, topic[:50])
+    return ctype, topic
 
 
-def build_prompt(content_type):
-    prompt_text = CONTEXT_PROMPTS[content_type]
-    title_hint = CONTENT_TITLES[content_type]
+def build_prompt(content_type, topic):
     today = datetime.now(timezone.utc).strftime("%B %d, %Y")
 
     return f"""You are a literary analysis writer specializing in weird fiction and The King in Yellow by Robert W. Chambers (1895).
 
 Write a blog post for today ({today}) with the following specifications:
 
-TOPIC TYPE: {title_hint}
-INSTRUCTION: {prompt_text}
+TOPIC: {topic}
+CONTENT TYPE: {CONTENT_TITLES.get(content_type, content_type)}
 
 REQUIREMENTS:
 - Title should be engaging and descriptive (not just the topic name)
 - Write 300-500 words in clear, accessible English
 - Use literary analysis, not plot summary only
 - Include specific references to the text where possible
-- No markdown code blocks in the body (plain markdown text only)
+- No markdown code blocks in the body (plain markdown only)
 - End with the following EXACT footer:
 
 ---
@@ -213,17 +353,18 @@ def call_github_models(prompt):
         return None
 
 
-def generate_title(content, content_type):
+def generate_title(content, topic):
     t = datetime.now(timezone.utc)
-    base = CONTENT_TITLES[content_type]
-    return f"{base} — {t.strftime('%B %d, %Y')}"
+    short = topic.split(" — ")[-1].split(" - ")[-1].strip()
+    return f"{short} — {t.strftime('%B %d, %Y')}"
 
 
-def save_post(content, content_type):
+def save_post(content, content_type, topic):
     now = datetime.now(timezone.utc)
     date_str = now.strftime("%Y-%m-%d")
-    title = generate_title(content, content_type)
-    slug = f"{date_str}-{content_type}"
+    title = generate_title(content, topic)
+    slug_safe = content_type
+    slug = f"{date_str}-{slug_safe}"
 
     frontmatter = f"""---
 layout: post
@@ -247,7 +388,7 @@ tags: [{content_type.replace('_', ' ')} the-king-in-yellow chambers analysis]
 
 def main():
     if not GH_TOKEN:
-        log.error("GH_MODELS_TOKEN not set. Create a GitHub secret: Settings > Secrets > Actions > GH_MODELS_TOKEN")
+        log.error("GH_MODELS_TOKEN not set")
         sys.exit(1)
 
     log.info("=" * 50)
@@ -255,11 +396,11 @@ def main():
     log.info("=" * 50)
 
     queue = load_queue()
-    content_type = pick_content_type(queue)
-    log.info("Content type: %s", content_type)
+    content_type, topic = pick_content_type_and_topic(queue)
+    log.info("Topic: %s", topic)
 
     log.info("Generating content with %s...", GH_MODEL)
-    prompt = build_prompt(content_type)
+    prompt = build_prompt(content_type, topic)
     content = call_github_models(prompt)
 
     if not content:
@@ -268,7 +409,7 @@ def main():
 
     log.info("Content generated (%d chars)", len(content))
 
-    filepath = save_post(content, content_type)
+    filepath = save_post(content, content_type, topic)
     log.info("Done: %s", filepath)
 
 
