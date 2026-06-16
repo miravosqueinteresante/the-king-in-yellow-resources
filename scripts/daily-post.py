@@ -367,8 +367,7 @@ def build_explore_more(content_type):
     for path, label in links:
         section += f"- [{label}]({SITE_BASE}/{path})\n"
 
-    section += f"\n*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [{AMAZON_LINK.replace('https://www.amazon.com/dp/', '')}]({AMAZON_LINK})*"
-    # ^ simpler: just the ASIN as text
+    section += f"\n*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [The King in Yellow: Nightmares Diary and Coloring Book]({AMAZON_LINK})*"
     return section
 
 

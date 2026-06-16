@@ -24,4 +24,4 @@ In this way, Yhtill enriches the lore of "The King in Yellow," inviting readers 
 
 - [Carcosa Glossary — Complete Guide](/the-king-in-yellow-resources/analysis/carcosa-glossary/)
 
-*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [B0CTXCQ9HM](https://www.amazon.com/dp/B0CTXCQ9HM)*
+*For a more interactive experience, there is a coloring book and nightmare journal inspired by The King in Yellow: [The King in Yellow: Nightmares Diary and Coloring Book](https://www.amazon.com/dp/B0CTXCQ9HM)*
