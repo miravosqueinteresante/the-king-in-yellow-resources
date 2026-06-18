@@ -1,7 +1,9 @@
 {
   "character_analysis": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "The Watchman \u2014 The Yellow Sign"
+    ],
+    "last_date": "2026-06-18"
   },
   "carcosa_lore": {
     "used": [
@@ -50,8 +52,10 @@
     "last_date": null
   },
   "behind_the_story": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "The Street of the Four Winds \u2014 the Latin Quarter"
+    ],
+    "last_date": "2026-06-17"
   },
   "mythos_exploration": {
     "used": [
