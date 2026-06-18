@@ -1,0 +1,26 @@
+---
+layout: null
+sitemap: false
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://www.sitemaps.org/schemas/sitemap/0.9 https://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+{% for p in site.pages %}
+{% unless p.url contains '.xml' or p.url contains 'assets/' or p.sitemap == false %}
+{% assign url = p.url | absolute_url | replace: '/index.html', '/' %}
+  <url>
+    <loc>{{ url }}</loc>
+  </url>
+{% endunless %}
+{% endfor %}
+
+{% for post in site.posts %}
+  <url>
+    <loc>{{ post.url | absolute_url }}</loc>
+    <lastmod>{{ post.date | date_to_xmlschema }}</lastmod>
+  </url>
+{% endfor %}
+
+</urlset>
