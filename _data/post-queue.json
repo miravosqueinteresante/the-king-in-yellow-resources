@@ -42,8 +42,10 @@
     "last_date": null
   },
   "reading_guide": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "Reading order \u2014 the four play-linked stories first"
+    ],
+    "last_date": "2026-06-21"
   },
   "symbolism_deep_dive": {
     "used": [],
