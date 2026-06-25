@@ -22,8 +22,10 @@
     "last_date": null
   },
   "quote_exploration": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "The closing of The Repairer of Reputations"
+    ],
+    "last_date": "2026-06-25"
   },
   "adaptation_spotlight": {
     "used": [
