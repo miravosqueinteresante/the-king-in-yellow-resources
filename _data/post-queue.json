@@ -39,8 +39,10 @@
     "last_date": null
   },
   "weird_fiction_history": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "The King in Yellow in the Cthulhu Mythos"
+    ],
+    "last_date": "2026-06-26"
   },
   "thematic_analysis": {
     "used": [],
