@@ -44,8 +44,10 @@
     "last_date": "2026-07-05"
   },
   "chambers_life": {
-    "used": [],
-    "last_date": null
+    "used": [
+      "Chambers' other supernatural works"
+    ],
+    "last_date": "2026-07-16"
   },
   "weird_fiction_history": {
     "used": [
